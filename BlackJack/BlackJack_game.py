@@ -102,6 +102,9 @@ def dealer_play(deck, discard, hand):
         hand.append(draw_card(deck, discard))
     return calculate_score(hand)
 
+# Who won
+def winner()
+
 # Main game flow
 def blackjack():
     deck = build_deck()
@@ -153,7 +156,6 @@ def blackjack():
         print(f"Dealer reveals: {show_hand(dealer)} Score: {calculate_score(dealer)}")
 
         # Handle dealer blackjack
-
         if calculate_score(dealer) == 21 and len(dealer) == 2:
             if insurance:
                 win_ins = insurance * 2
