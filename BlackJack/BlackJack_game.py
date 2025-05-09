@@ -78,7 +78,7 @@ def play_hand(deck, discard, hand, bet, bankroll):
             hand2 = [hand[1], draw_card(deck, discard)]
             total_res = 0
             for h in (hand1, hand2):
-                print(f"Playing split hand: {show_hand(h)}")
+                print(f"Playing split hand: {show_hand(h)} Score: {calculate_score(h)}")
                 res, bankroll = play_hand(deck, discard, h, bet, bankroll)
                 total_res += res
             return total_res, bankroll
