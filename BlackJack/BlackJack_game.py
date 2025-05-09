@@ -89,7 +89,7 @@ def play_hand(deck, discard, hand, bet, bankroll):
             print(f"Hand: {show_hand(hand)} Score: {calculate_score(hand)}")
             if calculate_score(hand) > 21:
                 return bet, bankroll
-            action = input("Hit [h] or stand [s]? ")
+            action = input("[h]it or [s]tand? ")
             while action not in ('h', 's'):
                 action = input("Invalid. Type h or s: ")
 
@@ -116,7 +116,7 @@ def blackjack():
         
         try:
             bet = input("Place your bet: $")
-            if bet == 'n' or 'o':
+            if bet == 'n' or bet =='o':
                 break
             bet = int(bet)
         except ValueError:
