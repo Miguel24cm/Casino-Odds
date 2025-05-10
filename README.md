@@ -18,5 +18,3 @@ Whether you're:
 
 This repo is for you!
 
-## 📂 Project Structure
-
