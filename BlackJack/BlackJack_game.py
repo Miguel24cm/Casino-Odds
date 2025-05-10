@@ -81,7 +81,7 @@ def play_hand(deck, discard, hand, bet, bankroll):
                 res, bankroll, spsp = play_hand(deck, discard, h, bet, bankroll)
                 sp.append((h, res))
             return bet, bankroll, sp
-        #when spliting more than 2 times is multiplyin or 3
+        #when spliting more than 2 times is multiplying or 3
         #still missing counting system
 
         # Hit/stand
