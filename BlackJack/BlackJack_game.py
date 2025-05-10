@@ -43,19 +43,130 @@ def calculate_score(hand):
 def show_hand(hand):
     return [card for (card, _) in hand]
 
+#Bet bot
+def bet_bot(deck, discard):
+    running_count = 0
+    for (_, v) in discard:
+        if v >= 10:
+            running_count -= 1
+        elif v <= 6:
+            running_count += 1
+    if (running_count/(len(deck)/52))>5:
+        return 100
+    elif (running_count/(len(deck)/52))>4:
+        return 50
+    else:
+        return 5
+
 # Bot
 def bot(player, d1, m):
-    calculate_score(player)
+    score=calculate_score(player)
     if player[0][1] == player[1][1] and m==0:
-        if player[0][1] == 2 or player[0][1] == 3:
+        if player[0][1] == 2 or player[0][1] == 3 or player[0][1] == 7:
             if d1<8:
                 return 'p'
             else:
-                'h'
+                return 'h'
+        elif player[0][1] == 4:
+            if d1==5 or d1==6:
+                return 'p'
+            else:
+                return 'h'
+        elif player[0][1] == 5:
+            if d1<10:
+                return 'd'
+            else:
+                return 'h'
+        elif player[0][1] == 6:
+            if d1<7:
+                return 'p'
+            else:
+                return 'h'
+        elif player[0][1] == 8:
+            return 'p'
+        elif player[0][1] == 9:
+            if d1==7 or d1==10 or d1==11:
+                return 's'
+            else:
+                return 'p'
+        elif player[0][1] == 10:
+            return 's'
+        elif player[0][1] == 11:
+            return 'p'
+    elif player[0][1] == 11 or player[1][1] == 11:
+        if score==13 or score==14:
+            if d1==5 or d1==6:
+                return 'd'
+            else:
+                return 'h'
+        elif score==15 or score==16:
+            if d1==4 or d1==5 or d1==6:
+                return 'd'
+            else:
+                return 'h'
+        elif score==17:
+            if d1==3 or d1==4 or d1==5 or d1==6:
+                return 'd'
+            else:
+                return 'h'
+        elif score==18:
+            if d1==3 or d1==4 or d1==5 or d1==6:
+                return 'd'
+            elif d1<9:
+                return 's'
+            else:
+                return 'h'
+        else:
+            return 's'
+    else:
+        if score<9:
+            return 'd'
+        elif score==9:
+            if d1==3 or d1==4 or d1==5 or d1==6:
+                return 'd'
+            else:
+                return 'h'
+        elif score==10:
+            if d1<10:
+                return 'd'
+            else:
+                return 'h'
+        elif score==11:
+            if d1<11:
+                return 'd'
+            else:
+                return 'h'
+        elif score==12:
+            if d1==4 or d1==5 or d1==6:
+                return 's'
+            else:
+                return 'h'
+        elif score<15:
+            if d1<7:
+                return 's'
+            else:
+                return 'h'
+        elif score==15:
+            if d1<7:
+                return 's'
+            elif d1==10:
+                return 'r'
+            else:
+                return 'h'
+        elif score==16:
+            if d1<7:
+                return 's'
+            elif d1>8:
+                return 'r'
+            else:
+                return 'h'
+        else:
+            return 's'
+
 
 
 # Player decision for a single hand
-def play_hand(deck, discard, hand, bet, bankroll, m=0):
+def play_hand(deck, discard, hand, bet, bankroll, d1, m=0):
     # Check for initial blackjack
     sp=[]
     if calculate_score(hand) == 21 and len(hand) == 2:
@@ -65,7 +176,8 @@ def play_hand(deck, discard, hand, bet, bankroll, m=0):
     # Offer options
     action=''
     while action not in ('h', 's', 'd', 'r', 'p'):
-        action = input("Choose action: [h]it, [s]tand, [d]ouble, su[r]render, s[p]lit: ")       
+        action = bot(hand, d1, m)
+        #action = input("Choose action: [h]it, [s]tand, [d]ouble, su[r]render, s[p]lit: ")       
         # Surrender
         if action == 'r':
             print("You surrendered. Lose half your bet.")
@@ -89,7 +201,7 @@ def play_hand(deck, discard, hand, bet, bankroll, m=0):
             hand2 = [hand[1], draw_card(deck, discard)]
             for h in (hand1, hand2):
                 print(f"Playing split hand: {show_hand(h)} Score: {calculate_score(h)}")
-                res, bankroll, spsp = play_hand(deck, discard, h, bet, bankroll, True)
+                res, bankroll, spsp = play_hand(deck, discard, h, bet, bankroll, d1, True)
                 sp.append((h, res))
             return bet, bankroll, sp
         #when spliting more than 2 times is multiplying or 3
@@ -101,7 +213,10 @@ def play_hand(deck, discard, hand, bet, bankroll, m=0):
             print(f"Hand: {show_hand(hand)} Score: {calculate_score(hand)}")
             if calculate_score(hand) > 21:
                 return bet, bankroll, sp
-            action = input("Hit [h] or stand [s]? ")
+            #action = input("Hit [h] or stand [s]? ")
+            action = bot(hand, d1, m)
+            if action == 'd' or action == 'r':
+                action = 'h'
 
             while action not in ('h', 's'):
                 action = input("Invalid. Type h or s: ")
@@ -158,7 +273,8 @@ def blackjack():
         print(f"\nCurrent bankroll: ${bankroll}")
         
         try:
-            bet = input("Place your bet: $")
+            bet=bet_bot(deck, discard)
+            #bet = input("Place your bet: $")
             if bet == 'n' or bet == 'o':
                 break
             bet = int(bet)
@@ -178,7 +294,7 @@ def blackjack():
         # Offer insurance
         insurance = 0
         if dealer[0][0][0] == 'A':
-            if input("Dealer has Ace up. Take insurance? (y/n): ").lower() == 'y':
+            if False: #input("Dealer has Ace up. Take insurance? (y/n): ").lower() == 'y':
                 max_ins = min(bankroll, bet//2)
                 while True:
                     try:
@@ -190,7 +306,7 @@ def blackjack():
                         pass
 
         # Player turn(s)
-        bet, bankroll, sp= play_hand(deck, discard, player, bet, bankroll)
+        bet, bankroll, sp= play_hand(deck, discard, player, bet, bankroll, dealer[0][1], 0)
 
         # Reveal dealer
         print(f"Dealer reveals: {show_hand(dealer)} Score: {calculate_score(dealer)}")
@@ -214,10 +330,7 @@ def blackjack():
         else:
             bankroll = winner(bankroll, dealer, sp[0][0], sp[0][1], dealer_score)
             bankroll = winner(bankroll, dealer, sp[1][0], sp[1][1], dealer_score)
-            print(sp)
-        #     while sp[1] != []: 
-            # for hd in sp:
-            #     bankroll = winner(bankroll, dealer, hd, bet, dealer_score)
+            #print(sp)
 
     print(f"Final bankroll: ${bankroll}")
     #print(deck)
