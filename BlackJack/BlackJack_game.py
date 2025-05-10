@@ -2,7 +2,7 @@ import random
 
 # Configuration
 NUM_DECKS = 6  # Number of decks used in shoe
-INITIAL_BANKROLL = 1000
+INITIAL_BANKROLL = 10000
 MIN_CARDS_BEFORE_SHUFFLE = 30  # Threshold to stop dealing new hands
 
 # Build a deck of cards
@@ -55,6 +55,10 @@ def bet_bot(deck, discard):
         return 100
     elif (running_count/(len(deck)/52))>4:
         return 50
+    elif (running_count/(len(deck)/52))>3:
+        return 25
+    elif (running_count/(len(deck)/52))>2:
+        return 10
     else:
         return 5
 
@@ -265,7 +269,7 @@ def blackjack():
     deck = build_deck()
     discard = []
     bankroll = INITIAL_BANKROLL
-    while bankroll > 0:
+    while bankroll > 100:
         if len(deck) < MIN_CARDS_BEFORE_SHUFFLE:
             print("Not enough cards left in shoe to continue. Ending game.")
             break
@@ -333,6 +337,7 @@ def blackjack():
             #print(sp)
 
     print(f"Final bankroll: ${bankroll}")
+    return bankroll
     #print(deck)
     counts = {}
     for (_, v) in deck:
@@ -356,4 +361,10 @@ def blackjack():
             running_count += 1
     print(f"\nCount value:{running_count}")
 
-blackjack()
+bank=[]
+games=1000
+for i in range(games):
+    bankr = blackjack()
+    bank.append(bankr)
+print(bank)
+print(sum(bank)-INITIAL_BANKROLL*games)
