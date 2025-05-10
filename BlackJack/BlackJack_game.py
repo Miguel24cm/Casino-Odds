@@ -45,7 +45,7 @@ def show_hand(hand):
 
 
 # Player decision for a single hand
-def play_hand(deck, discard, hand, bet, bankroll):
+def play_hand(deck, discard, hand, bet, bankroll, m=0):
     # Check for initial blackjack
     sp=[]
     if calculate_score(hand) == 21 and len(hand) == 2:
@@ -72,13 +72,14 @@ def play_hand(deck, discard, hand, bet, bankroll):
                 return bet, bankroll, sp
 
         # Split
-        if action == 'p' and sp == []:# and hand[0][0][0] == hand[1][0][0]:
+        if action == 'p' and m == 0 and hand[0][0][0] == hand[1][0][0]:
+            m+=1
             print("Splitting hand.")
             hand1 = [hand[0], draw_card(deck, discard)]
             hand2 = [hand[1], draw_card(deck, discard)]
             for h in (hand1, hand2):
                 print(f"Playing split hand: {show_hand(h)} Score: {calculate_score(h)}")
-                res, bankroll, spsp = play_hand(deck, discard, h, bet, bankroll)
+                res, bankroll, spsp = play_hand(deck, discard, h, bet, bankroll, True)
                 sp.append((h, res))
             return bet, bankroll, sp
         #when spliting more than 2 times is multiplying or 3
