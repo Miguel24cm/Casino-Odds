@@ -91,6 +91,7 @@ def play_hand(deck, discard, hand, bet, bankroll):
             if calculate_score(hand) > 21:
                 return bet, bankroll, sp
             action = input("Hit [h] or stand [s]? ")
+
             while action not in ('h', 's'):
                 action = input("Invalid. Type h or s: ")
 
