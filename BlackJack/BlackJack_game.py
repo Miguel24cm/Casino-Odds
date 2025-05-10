@@ -46,7 +46,7 @@ def show_hand(hand):
 # Bot
 def bot(player, d1, m):
     calculate_score(player)
-    if player[0][1] == player[1][1] and m==:
+    if player[0][1] == player[1][1] and m==0:
         if player[0][1] == 2 or player[0][1] == 3:
             if d1<8:
                 return 'p'
