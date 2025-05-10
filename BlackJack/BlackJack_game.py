@@ -51,7 +51,9 @@ def bet_bot(deck, discard):
             running_count -= 1
         elif v <= 6:
             running_count += 1
-    if (running_count/(len(deck)/52))>5:
+    if (running_count/(len(deck)/52))>6:
+        return 200
+    elif (running_count/(len(deck)/52))>5:
         return 100
     elif (running_count/(len(deck)/52))>4:
         return 50
@@ -304,19 +306,15 @@ def blackjack():
                     try:
                         insurance = int(input(f"Insurance bet up to ${max_ins}: $"))
                         if 0 < insurance <= max_ins:
-                            bankroll -= insurance
                             break
                     except ValueError:
                         pass
-
-        # Player turn(s)
-        bet, bankroll, sp= play_hand(deck, discard, player, bet, bankroll, dealer[0][1], 0)
-
-        # Reveal dealer
-        print(f"Dealer reveals: {show_hand(dealer)} Score: {calculate_score(dealer)}")
-
+        
         # Handle dealer blackjack
+        DBJ=False
         if calculate_score(dealer) == 21 and len(dealer) == 2:
+            DBJ=True
+            sp=[]
             if insurance:
                 win_ins = insurance * 2
                 bankroll += win_ins
@@ -324,6 +322,14 @@ def blackjack():
             print("Dealer has Blackjack!")
         elif insurance:
             print(f"Insurance lost ${insurance}.")
+
+        # Player turn(s)
+        if DBJ==False:
+            bet, bankroll, sp= play_hand(deck, discard, player, bet, bankroll, dealer[0][1], 0)
+
+        # Reveal dealer
+        print(f"Dealer reveals: {show_hand(dealer)} Score: {calculate_score(dealer)}")
+
 
         # Dealer draws and compare
         dealer_score = dealer_play(deck, discard, dealer)
@@ -362,9 +368,9 @@ def blackjack():
     print(f"\nCount value:{running_count}")
 
 bank=[]
-games=1000
+games=10000
 for i in range(games):
-    bankr = blackjack()
+    bankr = blackjack()-INITIAL_BANKROLL
     bank.append(bankr)
-print(bank)
-print(sum(bank)-INITIAL_BANKROLL*games)
+#print(bank)
+print(sum(bank))
