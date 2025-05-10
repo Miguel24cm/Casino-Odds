@@ -47,19 +47,19 @@ def show_hand(hand):
 # Player decision for a single hand
 def play_hand(deck, discard, hand, bet, bankroll):
     # Check for initial blackjack
+    sp=[]
     if calculate_score(hand) == 21 and len(hand) == 2:
         print("Blackjack on initial deal! Payout 3:2")
-        return bet * 1.5, bankroll
+        return bet * 1.5, bankroll, sp
 
     # Offer options
     action=''
     while action not in ('h', 's', 'd', 'r', 'p'):
-        action = input("Choose action: [h]it, [s]tand, [d]ouble, su[r]render, s[p]lit: ")
-        
+        action = input("Choose action: [h]it, [s]tand, [d]ouble, su[r]render, s[p]lit: ")       
         # Surrender
         if action == 'r':
             print("You surrendered. Lose half your bet.")
-            return -bet/2, bankroll
+            return -bet/2, bankroll, sp
 
         # Double down
         if action == 'd':
@@ -69,32 +69,33 @@ def play_hand(deck, discard, hand, bet, bankroll):
                 bet *= 2
                 hand.append(draw_card(deck, discard))
                 print(f"Hand after double: {show_hand(hand)} Score: {calculate_score(hand)}")
-                return bet, bankroll
+                return bet, bankroll, sp
 
         # Split
-        if action == 'p' and len(hand) == 2 and hand[0][0][0] == hand[1][0][0]:
+        if action == 'p' and sp == []:# and hand[0][0][0] == hand[1][0][0]:
             print("Splitting hand.")
             hand1 = [hand[0], draw_card(deck, discard)]
             hand2 = [hand[1], draw_card(deck, discard)]
-            total_res = 0
             for h in (hand1, hand2):
                 print(f"Playing split hand: {show_hand(h)} Score: {calculate_score(h)}")
-                res, bankroll = play_hand(deck, discard, h, bet, bankroll)
-                total_res += res
-            return total_res, bankroll
+                res, bankroll, spsp = play_hand(deck, discard, h, bet, bankroll)
+                sp.append((h, res))
+            return bet, bankroll, sp
+        #when spliting more than 2 times is multiplyin or 3
+        #still missing counting system
 
         # Hit/stand
         while action == 'h':
             hand.append(draw_card(deck, discard))
             print(f"Hand: {show_hand(hand)} Score: {calculate_score(hand)}")
             if calculate_score(hand) > 21:
-                return bet, bankroll
+                return bet, bankroll, sp
             action = input("Hit [h] or stand [s]? ")
             while action not in ('h', 's'):
                 action = input("Invalid. Type h or s: ")
 
     # No immediate resolution; return original bet placeholder
-    return bet, bankroll
+    return bet, bankroll, sp
 
 # Dealer plays
 def dealer_play(deck, discard, hand):
@@ -103,7 +104,34 @@ def dealer_play(deck, discard, hand):
     return calculate_score(hand)
 
 # Who won
-def winner()
+def winner(bankroll, dealer, hand, bet, dealer_score):
+    player_score = calculate_score(hand)
+    if player_score > 21:
+        bankroll -= bet
+        print(f"Busted!, You lose ${bet}.")
+        return bankroll
+    elif calculate_score(hand) == 21 and len(hand) == 2 and dealer_score == 21 and len(dealer) == 2:
+        print("Push BlackJack.")
+        return bankroll
+    elif calculate_score(hand) == 21 and dealer_score == 21 and len(hand) == 2 and len(dealer) > 2:
+        bankroll += bet
+        print(f"You win ${bet}!")
+        return bankroll
+    elif calculate_score(hand) == 21 and dealer_score == 21 and len(dealer) == 2 and len(hand) > 2:
+        bankroll -= bet
+        print(f"You lose ${bet}.")
+        return bankroll
+    elif dealer_score > 21 or player_score > dealer_score:
+        bankroll += bet
+        print(f"You win ${bet}!")
+        return bankroll
+    elif player_score < dealer_score:
+        bankroll -= bet
+        print(f"You lose ${bet}.")
+        return bankroll
+    else:
+        print("Push.")
+        return bankroll
 
 # Main game flow
 def blackjack():
@@ -119,7 +147,7 @@ def blackjack():
         
         try:
             bet = input("Place your bet: $")
-            if bet == 'n' or 'o':
+            if bet == 'n' or bet == 'o':
                 break
             bet = int(bet)
         except ValueError:
@@ -150,7 +178,7 @@ def blackjack():
                         pass
 
         # Player turn(s)
-        bet, bankroll = play_hand(deck, discard, player, bet, bankroll)
+        bet, bankroll, sp= play_hand(deck, discard, player, bet, bankroll)
 
         # Reveal dealer
         print(f"Dealer reveals: {show_hand(dealer)} Score: {calculate_score(dealer)}")
@@ -162,31 +190,22 @@ def blackjack():
                 bankroll += win_ins
                 print(f"Insurance pays ${win_ins}.")
             print("Dealer has Blackjack!")
-            if calculate_score(player) == 21 and len(player) == 2:
-                print("Push BlackJack.")
-                bankroll
-            else:
-                print(f"You lose main bet ${bet}.")
-                bankroll -=bet
-            continue
         elif insurance:
             print(f"Insurance lost ${insurance}.")
 
         # Dealer draws and compare
         dealer_score = dealer_play(deck, discard, dealer)
         print(f"Dealer final: {show_hand(dealer)} Score: {dealer_score}")
-        player_score = calculate_score(player)
-        if player_score > 21:
-            bankroll -= bet
-            print(f"Busted!, You lose ${bet}.")
-        elif dealer_score > 21 or player_score > dealer_score:
-            bankroll += bet
-            print(f"You win ${bet}!")
-        elif player_score < dealer_score:
-            bankroll -= bet
-            print(f"You lose ${bet}.")
+        
+        if sp == []:
+            bankroll = winner(bankroll, dealer, player, bet, dealer_score)
         else:
-            print("Push.")
+            bankroll = winner(bankroll, dealer, sp[0][0], sp[0][1], dealer_score)
+            bankroll = winner(bankroll, dealer, sp[1][0], sp[1][1], dealer_score)
+            print(sp)
+        #     while sp[1] != []: 
+            # for hd in sp:
+            #     bankroll = winner(bankroll, dealer, hd, bet, dealer_score)
 
     print(f"Final bankroll: ${bankroll}")
     #print(deck)
