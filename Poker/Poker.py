@@ -9,9 +9,6 @@ rank_values = {r: i for i, r in enumerate(ranks, start=2)}
 def create_deck():
     return [f"{rank} {suit}" for suit in suits for rank in ranks]
 
-def shuffle_deck(deck):
-    random.shuffle(deck)
-
 def deal(deck, num):
     return [deck.pop() for _ in range(num)]
 
@@ -63,7 +60,7 @@ def play_poker(num_players=2):
 
     # Setup
     deck = create_deck()
-    shuffle_deck(deck)
+    random.shuffle(deck)
     players = [deal(deck, 2) for _ in range(num_players)]
     community = deal(deck, 5)
 
